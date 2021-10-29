@@ -1096,8 +1096,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         string memory referralCode
     )
         external
-        whenNotPaused  
-        noReentrant
+        whenNotPaused
     {
         uint256 usdValue = getPriceinUSD(_tokenamount);
         getReferralSystem().referUserFromCode(referralCode, _msgSender(),usdValue);
