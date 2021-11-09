@@ -138,7 +138,7 @@ interface IReferralSystem {
     function referUserFromCode(string memory code, address referrerAddress, uint256 amountInUSd) external;
     function rewardUser(address referrerAddress, uint256 totalInvestedAmount, 
                             uint256 withdarwRequestedAmount, uint256 rewardAmountInDons) external;
-    function getReferredPool(address _address) external view returns (address);
+    function getReferredPool(address _poolAddress, address _address) external view returns (address);
     function rewardDelivered(address _address) external view returns (bool);
 }
 
@@ -641,29 +641,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     
     /***** View Functions *****/
     
-    // /**
-    // * @dev Get farmer Address of the pool
-    // */
-    // function getFarmerAddress()
-    //     external view
-    //     returns (address)
-    // {
-    //     return farmerAddress;
-    // }
-
-    // /**
-    // * @dev Get admin Address of the pool
-    // */
-    // function getAdminAddress()
-    //     external view
-    //     returns (address)
-    // {
-    //     return adminAddress;
-    // }
-    
     /**
-    * @dev Get cron Address of the pool
-    */
+     * @dev Get cron Address of the pool
+     * NOTE: None
+    **/
     function getCronAddress()
         external view
         returns (address)
@@ -672,8 +653,9 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
     
     /**
-    * @dev Get donStaking Address of the pool
-    */
+     * @dev Get donStaking Address of the pool
+     * NOTE: None
+    **/
     function getDonStakingAddress()
         external view
         returns (address)
@@ -682,9 +664,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
     /**
-    * @dev Get Investor Status of the pool
-    * @param _investor Investor address
-    */
+     * @dev Get Investor Status of the pool
+     * @param _investor Investor address
+     * NOTE: None
+    **/
     function isInvestor(
         address _investor
     )
@@ -696,6 +679,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
                     (greyInvestorAmount[_investor].investedAmountInToken > 0));
     }
     
+    /**
+     * @dev get withdraw status of investor
+     * NOTE: None
+    **/
     function isWithdrawalRequested(
         address _investor
     )
@@ -706,9 +693,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         return withdrawalRequested[_investor].requested;
     }
 
-     /**
-     * @dev return farmer Fee amount
-     */
+    /**
+     * @dev get farmer reward fee amount in percentage
+     * NOTE: None
+    **/
     function getFarmerRewardFee()
         public view
         returns (uint256)
@@ -717,9 +705,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
 
-     /**
-     * @dev return team Fee amount
-     */
+    /**
+     * @dev get TEAM reward fee amount in percentage
+     * NOTE: None
+    **/
     function getTeamRewardFee()
         public view
         returns (uint256)
@@ -728,9 +717,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
     /**
-    * @dev Get amount of invested fund by Investor
-    * @param _investor Investor address
-    */
+     * @dev get user total invested amount in token including grey amount
+     * @param _investor investor address
+     * NOTE: None
+    **/    
     function getUserInvestedAmount(
         address _investor
     )
@@ -742,7 +732,14 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
                             .add(greyInvestorAmount[_investor].investedAmountInToken);
     }
 
-    function getUserInvestedAmountInUSD(address _investor)
+    /**
+     * @dev get user total invested amount in USD including grey amount
+     * @param _investor investor address
+     * NOTE: None
+    **/
+    function getUserInvestedAmountInUSD(
+        address _investor
+    )
         external view 
         validAddress(_investor)
         returns (uint256 amountInUSD) 
@@ -752,9 +749,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }                       
     
     /**
-    * @dev Get amount of invested fund by Investor
-    * @param _investor Investor address
-    */
+     * @dev get user grey invested amount in token and USD
+     * @param _investor investor address
+     * NOTE: None
+    **/
     function getUserGreyInvestedAmount(
         address _investor
     )
@@ -767,8 +765,9 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
     
     /**
-     * @dev return investor count
-     */
+     * @dev get total investor count of pool
+     * NOTE: None
+    **/
     function getInvestorCount()
         public view
         returns (uint256)
@@ -777,8 +776,9 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
     /**
-    * @dev return total Invested amount in pool
-    */
+     * @dev get total invested amount in token of pool
+     * NOTE: None
+    **/
     function getTotalInvestAmount() 
         public view 
         returns (uint256 amountInToken)
@@ -787,6 +787,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
                             .add(totalGreyInvestedAmount);
     }
 
+    /**
+     * @dev get total invested amount in USD of pool
+     * NOTE: None
+    **/
     function getTotalInvestAmountInUSD() 
         public view 
         returns (uint256 amountInUSD)
@@ -796,8 +800,9 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
     
     /**
-    * @dev return total Grey Invested amount in pool
-    */
+     * @dev get total Grey invested amount in token and USD amount
+     * NOTE: None
+    **/
     function getTotalGreyInvestAmount() 
         public view 
         returns (uint256 amountInToken, uint256 amountInUSD)
@@ -807,8 +812,9 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
     /**
-    * @dev return total Grey Invested amount in pool
-    */
+     * @dev get total Grey withdraw amount in token and LP amount
+     * NOTE: None
+    **/
     function getTotalGreyWithdrawalAmount() 
         public view 
         returns (uint256 amountInToken, uint256 LPAmount)
@@ -818,8 +824,9 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
     /**
-    * @dev return invested Amount + Reward Amount
-    */
+     * @dev get total pool value including new invested values
+     * NOTE: None
+    **/
     function getinvestedAmountWithReward() 
         public view 
         returns (uint256 reward)
@@ -828,6 +835,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         reward = totalPoolValue + totalGreyInvestedAmount;
     }
 
+    /**
+     * @dev get total pool value in token amount
+     * NOTE: None
+    **/
     function getTotalPoolValue()
         public view
         returns (uint256)
@@ -835,10 +846,19 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         return totalPoolValue;   
     }
 
+
+    /**
+     * @dev get token of the pool
+     * NOTE: None
+    **/
     function getToken() public view returns(IBEP20){
         return IBEP20(tokenAddress);
     }
 
+    /**
+     * @dev get grey investor address array
+     * NOTE: None
+    **/
     function getGreyInvestorList()
         public view
         returns (address[] memory)
@@ -846,6 +866,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         return greyInvestor;
     }
 
+    /**
+     * @dev get withdraw request address array
+     * NOTE: None
+    **/
     function getGreyWithdrawalList()
         public view
         returns (address[] memory)
@@ -853,6 +877,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         return greyWithdrawal;
     }
 
+    /**
+     * @dev get new grey investorcount
+     * NOTE: None
+    **/
     function getGreyInvestorCount()
         public view
         returns (uint256)
@@ -860,6 +888,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         return greyInvestorCount;
     }
 
+    /**
+     * @dev get withdraw request count
+     * NOTE: None
+    **/
     function getGreyWithdrawalCount()
         public view
         returns (uint256)
@@ -868,9 +900,12 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
     /**
-    * @dev return Investor claimable Amount including
-    *       farmer and team share
-    */
+     * @dev get Investor claimable Amount including
+     *       farmer and team share
+     * @param _address investor address
+     * @param _LPAmountInPer withdrawal amount in percentage
+     * NOTE: None
+    **/
     function getInvestorClaimableAmount(
         address _address,
         uint256 _LPAmountInPer
@@ -890,12 +925,13 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         BUSDshare = totalPoolValue.mul(_LPtokens).div(_totalSupply);
     }
 
-
-
     /**
-    * @dev return Investor final claimable Amount excluding
-    *       farmer and team share
-    */
+     * @dev get Investor final claimable Amount excluding
+     *      farmer and team share
+     * @param _address investor address
+     * @param _LPAmountInPer withdrawal amount in percentage
+     * NOTE: None
+    **/
     function getFinalClaimableAmount(
         address _address,
         uint256 _LPAmountInPer
@@ -927,11 +963,11 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         BUSDshare += greyInvestorAmount[_address].investedAmountInToken;
     }
     
-    
     /**
-    * @dev returns approx derived LP Tokens
-    * @param _tokens amount of BUSD token to be invested in Pool
-    */
+     * @dev get approx derived LP Tokens
+     * @param _tokens amount of token to be invested in Pool
+     * NOTE: None
+    **/
     function calcLPToken(
         uint256 _tokens
     ) 
@@ -943,6 +979,12 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
                         _tokens;
     }
 
+    /**
+     * @dev get withdrawal request details like,
+            amountInToken, amountInUSD, amountInLP, etc
+     * @param _investor investor address
+     * NOTE: None
+    **/
     function getWithdrawalReqDetails (
         address _investor
     ) 
@@ -955,12 +997,27 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         }
     }
 
+    /**
+     * @dev get price on token in USD
+     * @param _amount amount to token
+     * NOTE: None
+    **/
+    function getPriceinUSD(
+        uint256 _amount
+    ) 
+        internal view 
+        returns (uint256) 
+    {
+        return getPriceFeed().getPriceinUSD(tokenAddress).mul(_amount).div(1 ether);
+    }
+
 /********************************************************************** */
     
     /**
-    * @dev Set farmer Address of the pool
-    * @param _farmerAddress new Farmer address
-    */
+     * @dev set/update farmer address
+     * @param _farmerAddress new farmer address
+     * NOTE: Restricted to owner only
+    **/
     function setFarmerAddress(
         address payable _farmerAddress
     )
@@ -972,9 +1029,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
     /**
-    * @dev Set admin Address of the pool
-    * @param _adminAddress new admin address
-    */
+     * @dev set/update admin address
+     * @param _adminAddress new admin address
+     * NOTE: Restricted to owner only
+    **/
     function setAdminAddress(
         address payable _adminAddress
     )
@@ -986,9 +1044,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
     /**
-    * @dev Set team Address of the pool
-    * @param _teamAddress new Farmer address
-    */
+     * @dev set/update team address
+     * @param _teamAddress new team address
+     * NOTE: Restricted to owner only
+    **/
     function setTeamAddress(
         address payable _teamAddress
     )
@@ -1000,9 +1059,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
     
     /**
-    * @dev Assign/update Cron Address to Pool
-    * @param _cronAddress new startegy address
-    */
+     * @dev set/update cron address
+     * @param _cronAddress new cron address
+     * NOTE: Restricted to owner only
+    **/
     function setCronAddress(
         address payable _cronAddress
     )
@@ -1013,6 +1073,11 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         cronAddress = address(_cronAddress);
     }
 
+    /**
+     * @dev set/update Pool's token Address
+     * @param _address token address
+     * NOTE: Restricted to owner only
+    **/
     function setTokenAddress(
         address _address
     ) 
@@ -1023,6 +1088,11 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         tokenAddress = _address;
     }
     
+    /**
+     * @dev set/update old Pool Address to Pool
+     * @param _address old Pool address
+     * NOTE: Restricted to owner only
+    **/
     function setOldPoolAddress(
         address _address
     ) 
@@ -1034,8 +1104,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
     /**
-    * @dev Assign/update donStaking Address to Pool
-    */
+     * @dev set/update donStaking Address to Pool
+     * @param _donStakingAddress donStaking contract address
+     * NOTE: Restricted to owner only
+    **/
     function setDonStakingAddress(
         address payable _donStakingAddress
     )
@@ -1051,7 +1123,8 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
      * @dev update farmer reward
      * @param _reward in percentage multiply by 100
      *          example if farmer reward is 10% pass 1000
-     */
+     * NOTE: Restricted to owner only
+    **/
     function updateFarmerReward(
         uint16 _reward
     )
@@ -1065,7 +1138,8 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
      * @dev update team reward
      * @param _reward in percentage multiply by 100
      *          example if team reward is 5% pass 500
-     */
+     * NOTE: Restricted to onwer only
+    **/
     function updateTeamReward(
         uint16 _reward
     )
@@ -1075,6 +1149,11 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         TEAM_REWARD = _reward;
     }
     
+    /**
+     * @dev function to update pool's total Value
+     * @param _totalPoolValue new total pool Value
+     * NOTE: Restricted to admin only
+    **/
     function updateTotalPoolValue(
         uint256 _totalPoolValue
     )
@@ -1087,10 +1166,12 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         totalPoolValue = _totalPoolValue;
     }
 
-    function getPriceinUSD(uint256 amount) internal view returns (uint256) {
-        return getPriceFeed().getPriceinUSD(tokenAddress).mul(amount).div(1 ether);
-    }
-
+    /**
+     * @dev user can deposit/Invest thier Token to the pool using referral code
+     * @param _tokenamount amount of token to be invested in Pool
+     * @param referralCode referral code of referrer
+     * NOTE: None
+    **/
     function depositLiquidityWithCode(
         uint256 _tokenamount, 
         string memory referralCode
@@ -1104,9 +1185,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
     
     /**
-    * @dev user can deposit/Invest there Token to the pool
-    * @param _tokens amount of BUSD token to be invested in Pool
-    */
+     * @dev user can deposit/Invest thier Token to the pool
+     * @param _tokens amount of token to be invested in Pool
+     * NOTE: None
+    **/
     function depositLiquidity(
         uint256 _tokens
     )
@@ -1143,6 +1225,12 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         emit DepositLiquidty(_msgSender(), _tokens, amountInUSD, block.timestamp);
     }
 
+    /**
+     * @dev function to assign DON LP token to new investors 
+     * @param _totalValue total Pool Value
+     * @param _newPoolValue new total Pool Value after investment in farm
+     * NOTE: Restricted to admin only
+    **/    
     function assignLp(
         uint256 _totalValue,
         uint256 _newPoolValue
@@ -1185,6 +1273,14 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         _paused = false;
     }
 
+    /**
+     * @dev function to set oldPoolValue and newPoolValue, both value required
+            to be set before using assignLpInSeq to assign LP in seq to new
+            investor
+     * @param _totalValue total Pool Value
+     * @param _newPoolValue new total Pool Value after investment in farm
+     * NOTE: Restricted to admin only
+    **/
     function updatePoolValues(
         uint256 _totalValue,
         uint256 _newPoolValue
@@ -1196,7 +1292,14 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         totalPoolValue = _newPoolValue;
     }
     
-    
+
+    /**
+     * @dev function to assign DON LP token to investors in Seq, when number
+            investor is increase, and can't assign LP to all user's in single
+            transaction.
+     * @param count number of new investors to whom LP need to be assign
+     * NOTE: Restricted to admin only
+    **/    
     function assignLpInSeq(
         uint256 count
     )
@@ -1244,8 +1347,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
     
     /**
-    * @dev user can withdraw Invested amount to the Pool
-    */
+     * @dev function to initate grey withdraw token request
+     * @param _amountInPer withdrawal amount in percentage(muliplier of 100)
+     * NOTE: None
+    **/
     function withdrawGreyLiquidity(
         uint256 _amountInPer
     )
@@ -1296,8 +1401,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
     /**
-    * @dev user can withdraw Invested amount to the Pool
-    */
+     * @dev function to initate withdraw token request
+     * @param _amountInPer withdrawal amount in percentage(muliplier of 100)
+     * NOTE: None
+    **/
     function withdrawLiquidity(
         uint256 _amountInPer
     )
@@ -1342,6 +1449,12 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         return withdrawalAmount;
     }
 
+    /**
+     * @dev function to complete withdraw process and send token to user
+     * @param _totalWithdrawValue total user requested withdrawal value
+     * @param _totalValue total pool value
+     * NOTE: Restricted to admin only
+    **/
     function withdraw(
         uint256 _totalWithdrawValue,
         uint256 _totalValue
@@ -1364,7 +1477,15 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         delete greyWithdrawal;
     }
 
-
+    /**
+     * @dev function to set totalPoolValue and greyWithdarwalPoolValue, both value
+            should be updated before calling complete withdraw process and send token 
+            to user in seq incase there are to-many request that can't be served 
+            in single transcation
+     * @param _totalPoolValue total pool value
+     * @param _greyWithdarwalPoolValue total user requested withdrawal value 
+     * NOTE: Restricted to admin only
+    **/
     function setGreyWithdarwalTotalValue(
         uint256 _totalPoolValue,
         uint256 _greyWithdarwalPoolValue
@@ -1377,6 +1498,13 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     }
 
 
+    /**
+     * @dev function to complete withdraw process and send token to user in seq
+            incase there are to-many request that can't be served in single
+            transcation
+     * @param count withdrawal requested investor count 
+     * NOTE: Restricted to admin only
+    **/
     function withdrawInSeq(
         uint256 count
     )
@@ -1401,7 +1529,12 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
             delete greyWithdrawal;
         }
     }
-    
+
+    /**
+     * @dev Internal function to complete withdraw process and send token to user
+     * @param investor investor address
+     * NOTE: None
+    **/    
     function internalWithdraw(
         address investor
     ) 
@@ -1427,8 +1560,8 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         {
             if(isReferralEnabled()){
                 IReferralSystem  referralSystem = getReferralSystem();
-                if(referralSystem.getReferredPool(investor) == address(this)){
-                    uint256 referralRewardinUSD = getPriceinUSD(profit);
+                if(referralSystem.getReferredPool(address(this),investor) == address(this)){
+                    uint256 referralRewardinUSD = getPriceinUSD(profit.sub(profit.mul(FARMER_REWARD + TEAM_REWARD).div(10000)));
                     require(referralRewardinUSD > 0, 'failed to get price in USD');
                     referralSystem.rewardUser(investor, investorInfo[investor].investedAmountInUSD, 
                                         withdrawalRequested[investor].amountInUSD, referralRewardinUSD);
@@ -1510,6 +1643,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         greyInvestor.pop();
     }
 
+    /**
+     * @dev take grey invested token amount and invest in farm
+     * NOTE: Restricted to admin only
+    **/
     function sendToFarm()
         external
         onlyAdmin
@@ -1519,6 +1656,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         token.transfer(_msgSender(), totalGreyInvestedAmount);
     }
     
+    /**
+     * @dev function help to get stuck BEP20 token in Pool contract
+     * NOTE: Restricted to admin only
+    **/
     function getStuckInvestedAmount()
         external
         onlyAdmin
@@ -1527,6 +1668,11 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         token.transfer(_msgSender(), token.balanceOf(address(this)).sub(totalGreyInvestedAmount));
     }
 
+    /**
+     * @dev Mint Total LP tokens amount equivalent to old Pool totol LP
+     * NOTE: Restricted to admin only, and These function need to executed
+     *       before migrating user from old pool to new pool.
+    **/
     function mintOldPoolLPValues( )
         external
         onlyAdmin
@@ -1538,11 +1684,20 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         _totalSupply = pool.totalSupply();
     }
 
+    /**
+     * @dev user can migrate himself from old Pool to new Pool
+     * NOTE: None
+    **/
     function migrateUser() external
     {
         internalMigrateUser(oldPoolAddress, _msgSender());
     }
 
+    /**
+     * @dev admin can migrate user from old Pool to new Pool
+     * @param investor investor address who is getting migrate
+     * NOTE: Restricted to admin only
+    **/
     function migrateUserWithAdminRight(
         address investor
     )
@@ -1553,6 +1708,12 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         internalMigrateUser(oldPoolAddress, investor);
     }
 
+    /**
+     * @dev Internal function which migrate user from old Pool to new Pool
+     * @param _oldPoolAddress old Pool address
+     * @param investor investor address who is getting migrate
+     * NOTE: None
+    **/
     function internalMigrateUser (
         address _oldPoolAddress,
         address investor
@@ -1580,7 +1741,13 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         emit UserMigrated(investor, _balances[investor], investorInfo[investor].investedAmountInToken);
     }
     
-    function adminMint(
+    /**
+     * @dev owner can mint extra LP token user.
+     * @param _addr User address to whom LP token need to be mint
+     * @param _amount amount LP token need to be mint
+     * NOTE: Restricted to Owner's only
+    **/
+    function privilegeMint(
         address _addr, 
         uint256 _amount
     ) 
@@ -1589,8 +1756,14 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     {
         _mint(_addr, _amount);
     }
-    
-    function adminBurn(
+
+    /**
+     * @dev owner can burn false LP token assigned to any user.
+     * @param _addr User address whose LP token need to be burn
+     * @param _amount amount LP token need to be burn
+     * NOTE: Restricted to Owner's only
+    **/
+    function privilegeBurn(
         address _addr, 
         uint256 _amount
     ) 
