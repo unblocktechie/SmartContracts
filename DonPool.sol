@@ -305,7 +305,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     /**
      * @dev sets initials supply and the owner
      */
-    function initialize(address _owner, address _farmer, address _admin) public initializer {
+    function initialize(address _owner, address _farmer, address _admin) public onlyOwner initializer {
         _name = 'Don-pool';
         _symbol = 'DPL';
         _decimals = 18;
@@ -320,8 +320,8 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         // tokenAddress = address(0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7); //WAVAX
         // tokenAddress = address(0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270); // WMATIC
         // tokenAddress = address(0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82); // CAKE
-        tokenAddress = address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56); // BUSD
-        // tokenAddress = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // WBNB
+        // tokenAddress = address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56); // BUSD
+        tokenAddress = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // WBNB
         teamAddress = address(0x8345F3AFa13a2ACC4fCd55A173eA21078aD958e8);
         cronAddress = address(0x7FF1F8C467114BfBbCC56E406c0Ec21E781bB959);
         donStakingAddress = address(0x8d40C8a9F4bD8D23a244cEc57b20B7f8f43C5e0d);
@@ -330,7 +330,6 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         FARMER_REWARD = 500; // 5% of profit here mutlipler is 100
         TEAM_REWARD = 500; // 5% of profit  here mutlipler is 100
     }
-
 
     /* Modifiers can be called before and / or after a function.
     * This modifier prevents a function from being called while
@@ -559,6 +558,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         _withdrawPaused = false;
         emit Unpaused(_msgSender());
     }
+    
     /**
     * @dev Moves tokens `amount` from `sender` to `recipient`.
     *
@@ -671,7 +671,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     function isInvestor(
         address _investor
     )
-        external view
+        public view
         validAddress(_investor)
         returns (bool)
     {
@@ -952,7 +952,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         BUSDshare = totalPoolValue.mul(_LPtokens).div(_totalSupply);
         
         uint256 profit = BUSDshare > amountInToken ?
-                          BUSDshare - amountInToken :
+                          BUSDshare.sub(amountInToken) :
                           0;
         
         if (profit > 0)
@@ -1243,17 +1243,20 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         require(length != 0,
                 "POOL: Nothing to invest");
 
+        require(_newPoolValue > _totalValue,
+                "POOL: Wrong Input values passed");
+                
         for(uint256 i = 0; i < length; i++)
         {
             address investor = greyInvestor[i];
             uint256 amount = greyInvestorAmount[investor].investedAmountInToken;
-            uint256 userAmountWithFeeRemoved = amount * (_newPoolValue - _totalValue) / totalGreyInvestedAmount;
+            uint256 userAmountWithFeeRemoved = (amount.mul(_newPoolValue.sub(_totalValue))).div(totalGreyInvestedAmount);
             uint256 LPamount =  (_totalSupply > 0 ) ? 
                                 (userAmountWithFeeRemoved.mul(_totalSupply)).div(_totalValue) :
-                                amount;
+                                userAmountWithFeeRemoved;
 
             _totalValue += userAmountWithFeeRemoved;
-            totalGreyInvestedAmount -= amount;
+            totalGreyInvestedAmount = totalGreyInvestedAmount.sub(amount);
             _mint(investor,LPamount);
 
             investorInfo[investor].investedAmountInToken += amount;
@@ -1271,6 +1274,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         greyInvestorCount = 0;
         totalPoolValue = _newPoolValue;
         _paused = false;
+        _withdrawPaused = false;
     }
 
     /**
@@ -1288,6 +1292,9 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         public
         onlyAdmin
     {
+        require(_newPoolValue > _totalValue,
+                "POOL: Wrong Input values passed");
+                
         oldTotalPoolValue = _totalValue;
         totalPoolValue = _newPoolValue;
     }
@@ -1309,6 +1316,9 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         require(greyInvestorCount != 0,
                 'Nothing to InvestInSeq');
 
+        require(totalPoolValue > oldTotalPoolValue,
+                "POOL: Wrong oldTotalPoolValue values");
+                
         if (count > greyInvestorCount) {
             count = greyInvestorCount;
         }
@@ -1317,14 +1327,14 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         {
             address investor = greyInvestor[i-1];
             uint256 amount = greyInvestorAmount[investor].investedAmountInToken;
-            uint256 userAmountWithFeeRemoved = amount * (totalPoolValue - oldTotalPoolValue) / totalGreyInvestedAmount;
+            uint256 userAmountWithFeeRemoved = (amount.mul(totalPoolValue.sub(oldTotalPoolValue))).div(totalGreyInvestedAmount);
             uint256 LPamount =  (_totalSupply > 0 ) ? 
                                 (userAmountWithFeeRemoved.mul(_totalSupply)).div(oldTotalPoolValue) :
-                                amount;
+                                userAmountWithFeeRemoved;
 
             oldTotalPoolValue += userAmountWithFeeRemoved;
-            totalGreyInvestedAmount -= amount;
-            totalGreyInvestedAmountInUSD -= greyInvestorAmount[investor].investedAmountInUSD;
+            totalGreyInvestedAmount = totalGreyInvestedAmount.sub(amount);
+            totalGreyInvestedAmountInUSD = totalGreyInvestedAmountInUSD.sub(greyInvestorAmount[investor].investedAmountInUSD);
             _mint(investor,LPamount);
 
             investorInfo[investor].investedAmountInToken += amount;
@@ -1343,6 +1353,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
             totalGreyInvestedAmount = 0;
             totalGreyInvestedAmountInUSD = 0;
             _paused = false;
+            _withdrawPaused = false;
         }
     }
     
@@ -1429,7 +1440,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         uint256 withdrawalAmountInUSD = investorInfo[_msgSender()].investedAmountInUSD.mul(_amountInPer).div(10000);
         uint256 BUSDshare = totalPoolValue.mul(_LPtokens).div(_totalSupply);
         uint256 profit = BUSDshare > withdrawalAmount ?
-                          BUSDshare - withdrawalAmount :
+                          BUSDshare.sub(withdrawalAmount) :
                           0;
         profit = profit.sub(profit.mul(FARMER_REWARD + TEAM_REWARD).div(10000));
         greyWithdrawalCount++;
@@ -1542,7 +1553,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     {
         IBEP20 token = getToken();
         uint256 _LPtokens = withdrawalRequested[investor].amountInLP;
-        uint256 tokenShare = greyWithdarwalPoolValue.mul(_LPtokens).div(totalGreyWithdrawLPAmount);//getInvestorClaimableAmount(investor);
+        uint256 tokenShare = greyWithdarwalPoolValue.mul(_LPtokens).div(totalGreyWithdrawLPAmount);
 
         require(token.balanceOf(address(this)) > (tokenShare*98)/100, 
                     'pool doesnot have enough balance');
@@ -1551,10 +1562,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
             tokenShare = token.balanceOf(address(this));
 
         _burn(investor, _LPtokens);
-        greyWithdarwalPoolValue -= tokenShare;
-        totalPoolValue -= tokenShare;
+        greyWithdarwalPoolValue = greyWithdarwalPoolValue.sub(tokenShare);
+        totalPoolValue = totalPoolValue.sub(tokenShare);
         uint256 profit = tokenShare > withdrawalRequested[investor].amountInToken ?
-                        tokenShare - withdrawalRequested[investor].amountInToken :
+                        tokenShare.sub(withdrawalRequested[investor].amountInToken) :
                         0;
         if (profit > 0)
         {
@@ -1653,6 +1664,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     {
         IBEP20 token = getToken();
         _paused = true;
+        _withdrawPaused = true;
         token.transfer(_msgSender(), totalGreyInvestedAmount);
     }
     
@@ -1729,14 +1741,22 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
                     'Pool: Not an active Investor of Old Pool');
         
         _balances[investor] += pool.balanceOf(investor);
-        investorInfo[investor].investedAmountInToken += pool.getUserInvestedAmount(investor);
-        investorInfo[investor].investedAmountInUSD += pool.getUserInvestedAmountInUSD(investor);
+        
+        uint256 amountInToken = pool.getUserInvestedAmount(investor);
+        uint256 amountInUsd = pool.getUserInvestedAmountInUSD(investor);
+        
+        if (isInvestor(investor) == false)
+        {
+            uniqueInvestorCount++;
+        }
+        
+        investorInfo[investor].investedAmountInToken += amountInToken;
+        investorInfo[investor].investedAmountInUSD += amountInUsd;
         investorInfo[investor].invested = true;
         isUserMigrated[investor] = true;
         
-        totalInvestedAmount += investorInfo[investor].investedAmountInToken;
-        totalInvestedAmountInUSD += investorInfo[investor].investedAmountInUSD;
-        uniqueInvestorCount++;
+        totalInvestedAmount += amountInToken;
+        totalInvestedAmountInUSD += amountInUsd;
         
         emit UserMigrated(investor, _balances[investor], investorInfo[investor].investedAmountInToken);
     }
