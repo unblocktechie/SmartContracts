@@ -1243,7 +1243,8 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         require(length != 0,
                 "POOL: Nothing to invest");
 
-        require(_newPoolValue > _totalValue,
+        require(_newPoolValue > _totalValue || 
+                    _newPoolValue.sub(_totalValue) <= totalGreyInvestedAmount,
                 "POOL: Wrong Input values passed");
                 
         for(uint256 i = 0; i < length; i++)
@@ -1316,7 +1317,8 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         require(greyInvestorCount != 0,
                 'Nothing to InvestInSeq');
 
-        require(totalPoolValue > oldTotalPoolValue,
+        require(totalPoolValue > oldTotalPoolValue ||
+                totalPoolValue.sub(oldTotalPoolValue) <= totalGreyInvestedAmount,
                 "POOL: Wrong oldTotalPoolValue values");
                 
         if (count > greyInvestorCount) {
