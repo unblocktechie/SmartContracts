@@ -1243,7 +1243,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         require(length != 0,
                 "POOL: Nothing to invest");
 
-        require(_newPoolValue > _totalValue || 
+        require(_newPoolValue > _totalValue  &&
                     _newPoolValue.sub(_totalValue) <= totalGreyInvestedAmount,
                 "POOL: Wrong Input values passed");
                 
@@ -1317,7 +1317,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         require(greyInvestorCount != 0,
                 'Nothing to InvestInSeq');
 
-        require(totalPoolValue > oldTotalPoolValue ||
+        require(totalPoolValue > oldTotalPoolValue &&
                 totalPoolValue.sub(oldTotalPoolValue) <= totalGreyInvestedAmount,
                 "POOL: Wrong oldTotalPoolValue values");
                 
@@ -1385,14 +1385,11 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
         require(token.balanceOf(address(this)) >= (greyTokenShare*98)/100, 
                             'pool doesnot have enough balance');
 
-        if (greyTokenShare > token.balanceOf(address(this)))
-            greyTokenShare = token.balanceOf(address(this));
-
         if (greyInvestorAmount[_msgSender()].investedAmountInToken == greyTokenShare) {
             updateGreyInvestorList(_msgSender());
             greyInvestorCount--;
         }
-        totalGreyInvestedAmount = totalGreyInvestedAmount.
+        totalGreyInvestedAmount = totalGreyInvestedAmount.  
                                         sub(greyTokenShare);
         totalGreyInvestedAmountInUSD = totalGreyInvestedAmountInUSD.
                                         sub(greyTokenShareInUSD);
@@ -1408,6 +1405,10 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
             investorInfo[_msgSender()].invested=false;
         }
         
+        if (greyTokenShare > token.balanceOf(address(this))) {
+            greyTokenShare = token.balanceOf(address(this));
+            greyTokenShareInUSD = getPriceinUSD(greyTokenShare);
+        }
 
         require(token.transfer(_msgSender(), greyTokenShare));
         emit GreyWithdraw(_msgSender(), _amountInPer, greyTokenShare, greyTokenShareInUSD, block.timestamp);
