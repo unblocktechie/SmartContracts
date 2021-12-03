@@ -1230,6 +1230,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
      * @param _totalValue total Pool Value
      * @param _newPoolValue new total Pool Value after investment in farm
      * NOTE: Restricted to admin only
+     * NOTE: function assignLp is is intended to change the current pool value
     **/    
     function assignLp(
         uint256 _totalValue,
@@ -1651,10 +1652,9 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
             if (greyInvestor[i] == _address)
             {
                 greyInvestor[i] = greyInvestor[length - 1];
+                greyInvestor.pop();
             }
         }
-
-        greyInvestor.pop();
     }
 
     /**
