@@ -1238,6 +1238,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     )
         public
         onlyAdmin
+        whenPaused
     {
 
         uint256 length = greyInvestor.length;
@@ -1314,6 +1315,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     )
         public
         onlyAdmin
+        whenPaused
     {
         require(greyInvestorCount != 0,
                 'Nothing to InvestInSeq');
@@ -1476,6 +1478,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     )
         external
         onlyAdmin
+        whenWithdrawPaused
     {
         uint256 length = greyWithdrawal.length;
 
@@ -1525,6 +1528,7 @@ contract Pool is Ownable, Events, PriceFeedUser, ReferralSystemUser, Initializab
     )
         external
         onlyAdmin
+        whenWithdrawPaused
     {
         require(greyWithdrawalCount != 0,
                 'Nothing to withdarwInSeq');
